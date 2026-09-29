@@ -8,6 +8,8 @@ else
 fi
 
 # Do not change code above this line. Use the PSQL variable above to query your database.
+echo -e "
+Total number of goals in all games from winning teams:"
 
 echo "$($PSQL "SELECT SUM(winner_goals) FROM games;")"
 
