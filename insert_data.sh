@@ -12,28 +12,43 @@ fi
 # Empty the database
 $PSQL "TRUNCATE TABLE games, teams;"
 
-# Read the CSV file
+# Build one SQL command instead of calling psql for every row
+SQL="BEGIN;"
+
+# Read the CSV file and collect unique teams
+TEAMS=""
+
 while IFS=',' read -r YEAR ROUND WINNER OPPONENT WINNER_GOALS OPPONENT_GOALS
 do
   if [[ $YEAR != "year" ]]
   then
-    WINNER_ID=$($PSQL "SELECT team_id FROM teams WHERE name='$WINNER'")
-
-    if [[ -z $WINNER_ID ]]
-    then
-      $PSQL "INSERT INTO teams(name) VALUES('$WINNER')"
-    fi
-
-    OPPONENT_ID=$($PSQL "SELECT team_id FROM teams WHERE name='$OPPONENT'")
-
-    if [[ -z $OPPONENT_ID ]]
-    then
-      $PSQL "INSERT INTO teams(name) VALUES('$OPPONENT')"
-    fi
-
-    WINNER_ID=$($PSQL "SELECT team_id FROM teams WHERE name='$WINNER'")
-    OPPONENT_ID=$($PSQL "SELECT team_id FROM teams WHERE name='$OPPONENT'")
-
-    $PSQL "INSERT INTO games(year, round, winner_id, opponent_id, winner_goals, opponent_goals) VALUES($YEAR, '$ROUND', $WINNER_ID, $OPPONENT_ID, $WINNER_GOALS, $OPPONENT_GOALS)"
+    TEAMS="$TEAMS('$WINNER'),('$OPPONENT'),"
   fi
 done < games.csv
+
+TEAMS="${TEAMS%,}"
+
+SQL="$SQL INSERT INTO teams(name) VALUES $TEAMS ON CONFLICT (name) DO NOTHING;"
+
+SQL="$SQL INSERT INTO games(year, round, winner_id, opponent_id, winner_goals, opponent_goals) VALUES"
+
+FIRST=true
+
+while IFS=',' read -r YEAR ROUND WINNER OPPONENT WINNER_GOALS OPPONENT_GOALS
+do
+  if [[ $YEAR != "year" ]]
+  then
+    if [[ $FIRST == true ]]
+    then
+      FIRST=false
+    else
+      SQL="$SQL,"
+    fi
+
+    SQL="$SQL($YEAR, '$ROUND', (SELECT team_id FROM teams WHERE name='$WINNER'), (SELECT team_id FROM teams WHERE name='$OPPONENT'), $WINNER_GOALS, $OPPONENT_GOALS)"
+  fi
+done < games.csv
+
+SQL="$SQL; COMMIT;"
+
+$PSQL "$SQL"
