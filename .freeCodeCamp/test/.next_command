@@ -1,0 +1,163 @@
+builtin unset VSCODE_INJECTION
+[ -z "$VSCODE_SHELL_INTEGRATION" ]
+[ "${VSCODE_PREVENT_SHELL_HISTORY:-}" = "1" ]
+[ -n "${VSCODE_ENV_REPLACE:-}" ]
+[ -n "${VSCODE_ENV_PREPEND:-}" ]
+[ -n "${VSCODE_ENV_APPEND:-}" ]
+[ -z "${VSCODE_PYTHON_AUTOACTIVATE_GUARD:-}" ]
+export VSCODE_PYTHON_AUTOACTIVATE_GUARD=1
+[ -n "${VSCODE_PYTHON_BASH_ACTIVATE:-}" ]
+for var in "${!VSCODE_PYTHON_@}"
+case "$var" in
+__vsc_regex_environment="^CYGWIN*|MINGW*|MSYS*"
+[[ "$(uname -s)" =~ $__vsc_regex_environment ]]
+__vsc_is_windows=0
+__vsc_regex_histcontrol=".*(erasedups|ignoreboth|ignoredups|ignorespace).*"
+[[ "${HISTCONTROL:-}" =~ $__vsc_regex_histcontrol ]]
+__vsc_history_verify=1
+builtin unset __vsc_regex_environment
+builtin unset __vsc_regex_histcontrol
+__vsc_initialized=0
+__vsc_original_PS1="$PS1"
+__vsc_original_PS2="$PS2"
+__vsc_custom_PS1=""
+__vsc_custom_PS2=""
+__vsc_in_command_execution="1"
+__vsc_current_command=""
+__vsc_nonce="$VSCODE_NONCE"
+unset VSCODE_NONCE
+__vsc_stable="$VSCODE_STABLE"
+unset VSCODE_STABLE
+[ "$__vsc_stable" = "0" ]
+[ -n "$STARSHIP_SESSION_KEY" ]
+[ -n "$POSH_SESSION_ID" ]
+builtin printf '\e]633;P;HasRichCommandDetection=True\a'
+[[ -n "${bash_preexec_imported:-}" ]]
+__vsc_dbg_trap="$(__vsc_get_trap DEBUG)"
+[[ -z "$__vsc_dbg_trap" ]]
+[[ "$__vsc_dbg_trap" != '__vsc_preexec "$_"' && "$__vsc_dbg_trap" != '__vsc_preexec_all "$_"' ]]
+trap '__vsc_preexec_all "$_"' DEBUG
+__vsc_original_prompt_command=${PROMPT_COMMAND:-}
+pwd
+ls --color=auto -la
+clear
+cd /workspace/project/.freeCodeCamp
+ls --color=auto -la
+find . -maxdepth 2 -type f -print
+clear
+cat setup.sh
+cat package.json
+sed -n '1,80p' test/1.1.test.js
+clear
+psql --version
+pg_lsclusters
+sudo service postgresql status
+psql -U postgres -d postgres -c "\l"
+cd /workspace/project
+ls --color=auto -l insert_data.sh queries.sh
+clear
+psql -U postgres -d postgres -c "CREATE DATABASE worldcup;"
+psql -U postgres -d postgres -c "\l"
+cd /workspace/project
+chmod +x insert_data.sh queries.sh
+ls --color=auto -l insert_data.sh queries.sh
+psql -U postgres -d postgres -c "\l"
+ls --color=auto -l /workspace/project/insert_data.sh /workspace/project/queries.sh
+clear
+psql -U postgres -d worldcup -c "\dt"
+psql -U postgres -d worldcuptest -c "\dt"
+cat /workspace/project/insert_data.sh
+clear
+psql -U postgres -d worldcup
+psql -U postgres -d postgres -c "\du"
+psql -U postgres -d worldcup -c "\dt"
+clear
+psql -U postgres -d worldcup -c "GRANT CONNECT ON DATABASE worldcup TO freecodecamp;"
+psql -U postgres -d worldcup -c "GRANT USAGE ON SCHEMA public TO freecodecamp;"
+psql -U postgres -d worldcup -c "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO freecodecamp;"
+psql -U postgres -d worldcup -c "GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO freecodecamp;"
+psql -U freecodecamp -d worldcup -c "\dt"
+cd /workspace/project
+./insert_data.sh
+psql -U postgres -d worldcup -c "SELECT COUNT(*) FROM teams;"
+psql -U postgres -d worldcup -c "SELECT COUNT(*) FROM games;"
+clear
+nano /workspace/project/insert_data.sh
+__vsc_prompt_cmd_original
+TEAMS=$(cat games.csv | tail -n +2 | sed -E 's/,[^,]*$//' | sed -E 's/^[^,]*,[^,]*,[^,]*,//' | sort -u)
+__vsc_prompt_cmd_original
+__vsc_prompt_cmd_original
+for TEAM in $TEAMS
+__vsc_prompt_cmd_original
+__vsc_prompt_cmd_original
+cat games.csv
+clear
+psql -U postgres -d worldcup -c "TRUNCATE TABLE games, teams RESTART IDENTITY;"
+psql -U postgres -d worldcup -c "TRUNCATE TABLE games, teams RESTART IDENTITY;"
+clear
+nano /workspace/project/insert_data.sh
+clear
+tail -30 /workspace/project/insert_data.sh
+cd /workspace/project
+./insert_data.sh
+psql -U postgres -d worldcup -c "SELECT COUNT(*) FROM teams;"
+psql -U postgres -d worldcup -c "SELECT COUNT(*) FROM games;"
+clear
+psql -U postgres -d worldcup -c "TRUNCATE TABLE games, teams RESTART IDENTITY;"
+nano /workspace/project/insert_data.sh
+clear
+__vsc_prompt_cmd_original
+cat games.csv
+__vsc_prompt_cmd_original
+__vsc_prompt_cmd_original
+cat games.csv
+cd /workspace/project
+./insert_data.sh
+psql -U postgres -d worldcup -c "SELECT COUNT(*) FROM teams;"
+psql -U postgres -d worldcup -c "SELECT COUNT(*) FROM games;"
+clear
+cd /workspace/project/.freeCodeCamp
+npx mocha test/1.1.test.js
+clear
+psql -h localhost -U postgres -d worldcup -c "SELECT current_user, current_database();"
+psql -h localhost -U postgres -d worldcuptest -c "SELECT current_user, current_database();"
+clear
+node -e "const {Client}=require('pg'); const c=new Client({connectionString:'postgresql://postgres@localhost:5432/worldcup'}); c.connect().then(()=>{console.log('NODE CONNECT OK'); return c.end()}).catch(e=>{console.error(e); process.exit(1)})"
+node -e "const {Client}=require('pg'); const c=new Client({connectionString:'postgresql://postgres@localhost:5432/worldcuptest'}); c.connect().then(()=>{console.log('NODE TEST CONNECT OK'); return c.end()}).catch(e=>{console.error(e); process.exit(1)})"
+clear
+node -e "const {Client}=require('pg'); const a=new Client({connectionString:'postgresql://postgres@localhost:5432/worldcup'}); const b=new Client({connectionString:'postgresql://postgres@localhost:5432/worldcuptest'}); (async()=>{console.time('test'); await a.connect(); console.log('WORLD CUP CONNECTED'); await b.connect(); console.log('TEST DB CONNECTED'); await b.query('TRUNCATE TABLE games, teams'); console.log('TRUNCATE OK'); await a.end(); await b.end(); console.timeEnd('test')})().catch(e=>{console.error(e); process.exit(1)})"
+clear
+../insert_data.sh test
+psql -U postgres -d worldcuptest -c "SELECT COUNT(*) AS teams FROM teams; SELECT COUNT(*) AS games FROM games;"
+clear
+psql -U postgres -d worldcuptest -c "TRUNCATE TABLE games, teams RESTART IDENTITY;"
+nano ../insert_data.sh
+clear
+bash -n ../insert_data.sh
+../insert_data.sh test
+clear
+nano ../insert_data.sh
+clear
+bash -n ../insert_data.sh
+psql -U postgres -d worldcuptest -c "TRUNCATE TABLE games, teams RESTART IDENTITY;"
+../insert_data.sh test
+clear
+wc -l /tmp/insert.sql
+head -5 /tmp/insert.sql
+psql -U postgres -d worldcuptest -c "SELECT COUNT(*) AS teams FROM teams; SELECT COUNT(*) AS games FROM games;"
+clear
+psql -U postgres -d worldcuptest -c "SELECT COUNT(*) AS teams FROM teams;"
+npx mocha test/1.1.test.js
+clear
+cd /workspace/project
+cat queries.sh
+cat expected_output.txt
+ls --color=auto -l queries.sh expected_output.txt
+clear
+cd /workspace/project
+chmod +x queries.sh
+bash -n queries.sh
+./queries.sh
+clear
+cd /workspace/project/.freeCodeCamp
+npx mocha test/1.1.test.js
